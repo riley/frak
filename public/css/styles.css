@@ -1,0 +1,28 @@
+html, body { height: 100%; margin: 0; padding: 0; }
+#map {
+  height: calc(100% - 80px);
+}
+.controls {
+  height: 80px;
+  background: #443333;
+}
+.instructions {
+  margin: 0;
+  color: white;
+  font-family: sans-serif;
+}
+.searchBox {
+  padding: 5px;
+  font-size: 16px;
+  background-color: #fff;
+  font-family: Roboto;
+  font-size: 15px;
+  font-weight: 300;
+  margin-left: 12px;
+  text-overflow: ellipsis;
+  width: 300px;
+}
+
+.searchBox:focus {
+  border-color: #4d90fe;
+}

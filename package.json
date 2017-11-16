@@ -1,0 +1,33 @@
+{
+  "name": "frak",
+  "version": "1.0.0",
+  "description": "data visualization to show the proximity of schools to fracking wells",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/riley/frak.git"
+  },
+  "keywords": [
+    "fracking",
+    "schools"
+  ],
+  "engines": {
+    "node": "8.5.0"
+  },
+  "author": "Riley Davis <riley.davis@gmail.com> (rileydav.is)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/riley/frak/issues"
+  },
+  "homepage": "https://github.com/riley/frak#readme",
+  "dependencies": {
+    "dotenv": "^4.0.0",
+    "express": "^4.13.4",
+    "lodash": "^4.1.0",
+    "mongodb": "^2.1.4",
+    "node-fetch": "^1.7.3"
+  }
+}

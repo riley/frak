@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fraking and you!</title>
+  <meta charset=“utf-8”>
+  <link href="css/styles.css" type="text/css" rel="stylesheet" />
+</head>
+<body>
+  <div class="controls">
+    <p class="instructions">Enter your address</p>
+    <input type="text" id="searchBox" class="searchBox" name="search" value="813 Tempted Ways, Longmont, CO"/>
+  </div>
+  <div id="map"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/4.1.1/es6-promise.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+  <script src="js/lodash.core.js"></script>
+<script>
+
+var map;
+var input = document.getElementById('searchBox');
+var autocomplete;
+var infowindow;
+var marker;
+
+function init() {
+  var options = {center: {lat: 38.8974742, lng: -104.8124622}, zoom: 8, styles: [{"featureType":"administrative","elementType":"all","stylers":[{"visibility":"on"},{"lightness":33}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2e5d4"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#c5dac6"}]},{"featureType":"poi.park","elementType":"labels","stylers":[{"visibility":"on"},{"lightness":20}]},{"featureType":"road","elementType":"all","stylers":[{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#c5c6c6"}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#e4d7c6"}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#fbfaf7"}]},{"featureType":"water","elementType":"all","stylers":[{"visibility":"on"},{"color":"#acbcc9"}]}]};
+  map = new google.maps.Map(document.getElementById('map'), options);
+  var markers = [];
+  var marker = new google.maps.Marker({map: map});
+  autocomplete = new google.maps.places.Autocomplete(input);
+  autocomplete.bindTo('bounds', map);
+  infowindow = new google.maps.InfoWindow();
+
+  autocomplete.addListener('place_changed', function () {
+    infowindow.close();
+    var place = autocomplete.getPlace();
+    if (!place.geometry) {
+      console.warn('Autocomplete contains no geometry.');
+      return;
+    }
+
+    map.setCenter(place.geometry.location);
+    map.setZoom(13);
+    marker.setIcon(/** @type {google.maps.Icon} */({
+      url: place.icon,
+      size: new google.maps.Size(71, 71),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(17, 34),
+      scaledSize: new google.maps.Size(35, 35)
+    }));
+    marker.setPosition(place.geometry.location);
+    marker.setVisible(true);
+
+    var address = '';
+    if (place.address_components) {
+      address = [
+        (place.address_components[0] && place.address_components[0].short_name || ''),
+        (place.address_components[1] && place.address_components[1].short_name || ''),
+        (place.address_components[2] && place.address_components[2].short_name || '')
+      ].join(' ');
+    }
+
+    infowindow.setContent('<div><strong>' + place.name + '</strong><br>' + address + '</div>');
+    infowindow.open(map);
+    infowindow.setPosition(place.geometry.location);
+  });
+
+  function fetchData (center, zoom) {
+    var center = map.getCenter();
+
+    var image = {
+      url: '/img/ic_announcement_black_24dp_1x.png',
+      size: new google.maps.Size(24, 24),
+      origin: new google.maps.Point(0, 0),
+      anchor: new google.maps.Point(12, 12)
+    };
+
+
+    var url = `/search?lat=${encodeURI(center.lat())}&lng=${encodeURI(center.lng())}&zoom=${map.getZoom()}`;
+    fetch(url).then(function (response) {
+      return response.json();
+    }).then(function (json) {
+
+      json.wells.forEach(function (well, i) {
+        var lat = well.loc.coordinates[1];
+        var lng = well.loc.coordinates[0];
+        var bounds = {
+          north: lat - 0.001,
+          south: lat + 0.001,
+          east: lng - 0.001,
+          west: lng + 0.001
+        };
+
+        if (markers[i]) {
+          // re-use a marker
+          markers[i].setPosition({lat: lat, lng: lng});
+        } else {
+          // push a new marker onto the stack
+          var marker = new google.maps.Marker({
+            icon: image,
+            position: {lat: lat, lng: lng},
+            title: well.name,
+            map: map
+          });
+          markers[i] = marker;
+        }
+
+        markers[i].setVisible(true);
+      });
+
+      // set the rest of the rectangles in the array to be invisible.
+      for (var i = json.wells.length; i < markers.length; i++) {
+        markers[i].setVisible(false);
+      }
+    });
+  }
+
+  map.addListener('center_changed', fetchData);
+
+  map.addListener('zoom_changed', fetchData);
+}
+
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDov1VtbGSfFLnAjMNWMfbJviNvb7-kWI8&callback=init&libraries=places"></script>
+</body>
+</html>
